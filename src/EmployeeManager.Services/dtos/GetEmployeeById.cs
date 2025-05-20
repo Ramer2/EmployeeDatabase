@@ -4,8 +4,8 @@ namespace EmployeeManager.Services.dtos;
 
 public class GetEmployeeById
 {
-    public Person Person { get; set; }
+    public PersonDto PersonDto { get; set; }
     public decimal Salary { get; set; }
-    public object Position { get; set; }
+    public object PositionDto { get; set; }
     public DateTime HireDate { get; set; }
 }

@@ -30,4 +30,29 @@ public class EmployeeService : IEmployeeService
 
         return employeeDtos;
     }
+
+    public async Task<GetEmployeeById?> GetEmployeeById(int id, CancellationToken cancellationToken)
+    {
+        var employee = await _employeeRepository.GetEmployeeById(id, cancellationToken);
+        if (employee == null) return null;
+
+        var personDto = new PersonDto
+        {
+            Id = employee.Id,
+            FirstName = employee.Person.FirstName,
+            MiddleName = employee.Person.MiddleName,
+            LastName = employee.Person.LastName,
+            Email = employee.Person.Email,
+            PassportNumber = employee.Person.PassportNumber,
+            PhoneNumber = employee.Person.PhoneNumber
+        };
+        
+        return new GetEmployeeById
+        {
+            PersonDto = personDto,
+            PositionDto = new PositionDto { Id = employee.Position.Id, PositionName = employee.Position.Name },
+            HireDate = employee.HireDate,
+            Salary = employee.Salary
+        };
+    }
 }

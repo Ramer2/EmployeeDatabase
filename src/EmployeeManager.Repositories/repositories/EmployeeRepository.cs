@@ -27,4 +27,19 @@ public class EmployeeRepository : IEmployeeRepository
             throw new ApplicationException("Error while getting all employees", ex);
         }
     }
+
+    public Task<Employee?> GetEmployeeById(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return _context.Employees
+                .Include(p => p.Person)
+                .Include(pos => pos.Position)
+                .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Error while getting employee by id", ex);
+        }
+    }
 }

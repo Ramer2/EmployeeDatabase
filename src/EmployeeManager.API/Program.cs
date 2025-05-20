@@ -122,9 +122,19 @@ app.MapGet("/api/employees", async (IEmployeeService employeeService, Cancellati
     }
 });
 
-app.MapGet("/api/employees/{id}", async (EmployeeDatabaseContext context, CancellationToken cancellationToken, int id) =>
+app.MapGet("/api/employees/{id}", async (int id, IEmployeeService employeeService, CancellationToken cancellationToken) =>
 {
-    
+    try
+    {
+        var employee = await employeeService.GetEmployeeById(id, cancellationToken);
+        if (employee == null) return Results.NotFound("Employee not found");
+        
+        return Results.Ok(employee);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
 });
 
 app.Run();

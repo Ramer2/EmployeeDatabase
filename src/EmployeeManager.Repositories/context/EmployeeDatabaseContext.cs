@@ -20,7 +20,7 @@ public partial class EmployeeDatabaseContext : DbContext
 
     public virtual DbSet<DeviceType?> DeviceTypes { get; set; }
 
-    public virtual DbSet<Employee> Employees { get; set; }
+    public virtual DbSet<Employee?> Employees { get; set; }
 
     public virtual DbSet<Person> People { get; set; }
 
