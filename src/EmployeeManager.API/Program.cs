@@ -109,15 +109,22 @@ app.MapDelete("/api/devices/{id}", async (int id, IDeviceService deviceService, 
 
 app.MapGet("/api/employees", async (IEmployeeService employeeService, CancellationToken cancellationToken) =>
 {
-    var employees = await employeeService.GetAllEmployees(cancellationToken);
-    if (employees.Count == 0) return Results.NotFound("No employees found");
-    
-    return Results.Ok(employees);
+    try
+    {
+        var employees = await employeeService.GetAllEmployees(cancellationToken);
+        if (employees.Count == 0) return Results.NotFound("No employees found");
+
+        return Results.Ok(employees);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
 });
 
 app.MapGet("/api/employees/{id}", async (EmployeeDatabaseContext context, CancellationToken cancellationToken, int id) =>
 {
-    throw new NotImplementedException();
+    
 });
 
 app.Run();
