@@ -11,4 +11,6 @@ public interface IDeviceRepository
     public Task<bool> CreateDevice(Device device, CancellationToken cancellationToken);
     
     public Task<DeviceType?> GetDeviceTypeByName(string name, CancellationToken cancellationToken);
+
+    public Task<bool> UpdateDevice(int id, Device updateDevice, CancellationToken cancellationToken);
 }

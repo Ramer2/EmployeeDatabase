@@ -68,4 +68,23 @@ public class DeviceRepository : IDeviceRepository
             throw new ApplicationException($"Error retrieving device type with name {name}", ex);
         }
     }
+
+    public async Task<bool> UpdateDevice(int id, Device updateDevice, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var device = await GetDeviceById(id, cancellationToken);
+
+            device.Name = updateDevice.Name;
+            device.IsEnabled = updateDevice.IsEnabled;
+            device.DeviceType = updateDevice.DeviceType;
+            device.AdditionalProperties = updateDevice.AdditionalProperties;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"Error updating device with id {id}", ex);
+        }
+    }
 }

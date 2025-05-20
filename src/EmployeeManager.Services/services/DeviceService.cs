@@ -82,10 +82,42 @@ public class DeviceService : IDeviceService
             Name = createDeviceDto.Name,
             DeviceType = deviceType,
             IsEnabled = createDeviceDto.IsEnabled,
-            AdditionalProperties = createDeviceDto.AdditionalProperties
+            AdditionalProperties = createDeviceDto.AdditionalProperties == null ? "" : createDeviceDto.AdditionalProperties
         };
 
         await _deviceRepository.CreateDevice(device, cancellationToken);
         return true;
+    }
+
+    public async Task<bool> UpdateDevice(int id, UpdateDeviceDto updateDeviceDto, CancellationToken cancellationToken)
+    {
+        if (updateDeviceDto.DeviceType == null)
+        {
+            throw new ArgumentException("Invalid device type");
+        }
+        
+        if (updateDeviceDto.Name == null)
+        {
+            throw new ArgumentException("Invalid device name");
+        }
+        
+        var deviceCheck = await _deviceRepository.GetDeviceById(id, cancellationToken);
+        if (deviceCheck == null) 
+            throw new KeyNotFoundException("Device not found");
+        
+        var deviceType = await _deviceRepository.GetDeviceTypeByName(updateDeviceDto.DeviceType, cancellationToken);
+        if (deviceType == null)
+        {
+            throw new ArgumentException("Invalid device type");
+        }
+        
+        var device = new Device
+        {
+            Name = updateDeviceDto.Name,
+            IsEnabled = updateDeviceDto.IsEnabled,
+            DeviceType = deviceType,
+            AdditionalProperties = updateDeviceDto.AdditionalProperties == null ? "" : updateDeviceDto.AdditionalProperties
+        };
+        return await _deviceRepository.UpdateDevice(id, device, cancellationToken);
     }
 }

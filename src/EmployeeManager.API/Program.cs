@@ -1,7 +1,6 @@
 using EmployeeManager.Repository.context;
 using EmployeeManager.Repository.interfaces;
 using EmployeeManager.Repository.repositories;
-using EmployeeManager.Services;
 using EmployeeManager.Services.dtos;
 using EmployeeManager.Services.interfaces;
 using EmployeeManager.Services.services;
@@ -71,9 +70,21 @@ app.MapPost("/api/devices", async (IDeviceService deviceService, CancellationTok
     }
 });
 
-app.MapPut("/api/devices/{id}", async (EmployeeDatabaseContext context, CancellationToken cancellationToken, int id, CreateDeviceDto createDeviceDto) =>
+app.MapPut("/api/devices/{id}", async (int id, UpdateDeviceDto updateDeviceDto, IDeviceService deviceService, CancellationToken cancellationToken) =>
 {
-    throw new NotImplementedException();
+    try
+    {
+        await deviceService.UpdateDevice(id, updateDeviceDto, cancellationToken);
+        return Results.Ok();
+    }
+    catch (KeyNotFoundException)
+    {
+        return Results.NotFound($"No device found with id: '{id}'");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
 });
 
 app.MapDelete("/api/devices/{id}", async (EmployeeDatabaseContext context, CancellationToken cancellationToken, int id) =>
