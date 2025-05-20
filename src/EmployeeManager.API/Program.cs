@@ -14,6 +14,9 @@ builder.Services.AddDbContext<EmployeeDatabaseContext>(options => options.UseSql
 builder.Services.AddTransient<IDeviceRepository, DeviceRepository>();
 builder.Services.AddTransient<IDeviceService, DeviceService>();
 
+builder.Services.AddTransient<IEmployeeService, EmployeeService>();
+builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -104,9 +107,12 @@ app.MapDelete("/api/devices/{id}", async (int id, IDeviceService deviceService, 
     }
 });
 
-app.MapGet("/api/employees", async (EmployeeDatabaseContext context, CancellationToken cancellationToken) =>
+app.MapGet("/api/employees", async (IEmployeeService employeeService, CancellationToken cancellationToken) =>
 {
-    throw new NotImplementedException();
+    var employees = await employeeService.GetAllEmployees(cancellationToken);
+    if (employees.Count == 0) return Results.NotFound("No employees found");
+    
+    return Results.Ok(employees);
 });
 
 app.MapGet("/api/employees/{id}", async (EmployeeDatabaseContext context, CancellationToken cancellationToken, int id) =>
