@@ -6,7 +6,7 @@ public class GetDeviceByIdDto
     public string DeviceType { get; set; }
     public bool IsEnabled { get; set; }
     public object AdditionalProperties { get; set; }
-    public GetAllEmployeeDto? CurrentEmployee { get; set; }
+    public object? CurrentEmployee { get; set; }
 
     public GetDeviceByIdDto()
     {

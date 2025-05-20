@@ -8,8 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="interfaces\" />
-      <Folder Include="repositories\" />
+      <ProjectReference Include="..\EmployeeManager.Models\EmployeeManager.Models.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,10 +17,6 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.16" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\EmployeeManager.Models\EmployeeManager.Models.csproj" />
     </ItemGroup>
 
 </Project>

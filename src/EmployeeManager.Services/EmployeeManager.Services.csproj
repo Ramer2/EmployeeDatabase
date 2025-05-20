@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\EmployeeManager.Models\EmployeeManager.Models.csproj" />
+      <ProjectReference Include="..\EmployeeManager.Repositories\EmployeeManager.Repositories.csproj" />
     </ItemGroup>
 
 </Project>

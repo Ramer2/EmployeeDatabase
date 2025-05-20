@@ -18,7 +18,7 @@ public partial class EmployeeDatabaseContext : DbContext
 
     public virtual DbSet<DeviceEmployee> DeviceEmployees { get; set; }
 
-    public virtual DbSet<DeviceType> DeviceTypes { get; set; }
+    public virtual DbSet<DeviceType?> DeviceTypes { get; set; }
 
     public virtual DbSet<Employee> Employees { get; set; }
 
