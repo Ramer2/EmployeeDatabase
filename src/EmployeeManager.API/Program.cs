@@ -87,9 +87,21 @@ app.MapPut("/api/devices/{id}", async (int id, UpdateDeviceDto updateDeviceDto, 
     }
 });
 
-app.MapDelete("/api/devices/{id}", async (EmployeeDatabaseContext context, CancellationToken cancellationToken, int id) =>
+app.MapDelete("/api/devices/{id}", async (int id, IDeviceService deviceService, CancellationToken cancellationToken) =>
 {
-    throw new NotImplementedException();
+    try
+    {
+        await deviceService.DeleteDevice(id, cancellationToken);
+        return Results.Ok();
+    }
+    catch (KeyNotFoundException)
+    {
+        return Results.NotFound($"No device found with id: '{id}'");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
 });
 
 app.MapGet("/api/employees", async (EmployeeDatabaseContext context, CancellationToken cancellationToken) =>

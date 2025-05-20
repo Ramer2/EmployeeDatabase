@@ -120,4 +120,13 @@ public class DeviceService : IDeviceService
         };
         return await _deviceRepository.UpdateDevice(id, device, cancellationToken);
     }
+
+    public async Task<bool> DeleteDevice(int id, CancellationToken cancellationToken)
+    {
+        var deviceCheck = await _deviceRepository.GetDeviceById(id, cancellationToken);
+        if (deviceCheck == null) 
+            throw new KeyNotFoundException("Device not found");
+        
+        return await _deviceRepository.DeleteDevice(id, cancellationToken);
+    }
 }

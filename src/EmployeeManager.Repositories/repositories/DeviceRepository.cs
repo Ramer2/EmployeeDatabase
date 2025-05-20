@@ -87,4 +87,18 @@ public class DeviceRepository : IDeviceRepository
             throw new ApplicationException($"Error updating device with id {id}", ex);
         }
     }
+
+    public async Task<bool> DeleteDevice(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _context.Devices.Remove(_context.Devices.FirstOrDefault(x => x.Id == id));
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"Error deleting device with id {id}", ex);
+        }
+    }
 }
