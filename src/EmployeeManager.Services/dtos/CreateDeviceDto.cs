@@ -5,7 +5,6 @@ namespace EmployeeManager.Services.dtos;
 
 public class CreateDeviceDto
 {
-    [Required]
     public string Name { get; set; }
     public string? DeviceType { get; set; }
     public bool IsEnabled { get; set; }
