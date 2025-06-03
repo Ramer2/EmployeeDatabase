@@ -1,12 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using EmployeeManager.API;
 
 namespace EmployeeManager.Services.dtos;
 
 public class CreateDeviceDto
 {
-    public string Name { get; set; }
-    public string? DeviceType { get; set; }
+    [Required]
+    [StringLength(100)]
+    public string Name { get; set; } = null!;
+    
+    [Required]
+    [StringLength(100)]
+    public string DeviceType { get; set; } = null!;
+    
+    [Required]
     public bool IsEnabled { get; set; }
-    public object AdditionalProperties { get; set; }
+    
+    public object? AdditionalProperties { get; set; }
 }

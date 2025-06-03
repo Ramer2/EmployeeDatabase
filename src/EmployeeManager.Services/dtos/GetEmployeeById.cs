@@ -1,6 +1,4 @@
-﻿using EmployeeManager.API;
-
-namespace EmployeeManager.Services.dtos;
+﻿namespace EmployeeManager.Services.dtos;
 
 public class GetEmployeeById
 {

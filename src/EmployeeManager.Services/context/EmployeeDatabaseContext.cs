@@ -1,7 +1,7 @@
-﻿using EmployeeManager.API;
+﻿using EmployeeManager.Models.models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EmployeeManager.Repository.context;
+namespace EmployeeManager.Services.context;
 
 public partial class EmployeeDatabaseContext : DbContext
 {

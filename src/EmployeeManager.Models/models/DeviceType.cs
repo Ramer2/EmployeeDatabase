@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace EmployeeManager.API;
+﻿namespace EmployeeManager.Models.models;
 
 public partial class DeviceType
 {

@@ -1,5 +1,5 @@
-﻿using EmployeeManager.API;
-using EmployeeManager.Repository.context;
+﻿using EmployeeManager.Models.models;
+using EmployeeManager.Services.context;
 using EmployeeManager.Services.dtos;
 using EmployeeManager.Services.interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -105,7 +105,7 @@ public class DeviceService : IDeviceService
                 Name = createDeviceDto.Name,
                 DeviceType = deviceType,
                 IsEnabled = createDeviceDto.IsEnabled,
-                AdditionalProperties = (createDeviceDto.AdditionalProperties == null ? "" : createDeviceDto.AdditionalProperties) as string
+                AdditionalProperties = (createDeviceDto.AdditionalProperties == null ? "" : createDeviceDto.AdditionalProperties).ToString()
             };
 
             await _context.Devices.AddAsync(device, cancellationToken);
@@ -155,7 +155,7 @@ public class DeviceService : IDeviceService
                 Name = updateDeviceDto.Name,
                 IsEnabled = updateDeviceDto.IsEnabled,
                 DeviceType = deviceType,
-                AdditionalProperties = updateDeviceDto.AdditionalProperties == null ? "" : updateDeviceDto.AdditionalProperties
+                AdditionalProperties = (updateDeviceDto.AdditionalProperties == null ? "" : updateDeviceDto.AdditionalProperties).ToString()
             };
 
             device.Name = updateDevice.Name;

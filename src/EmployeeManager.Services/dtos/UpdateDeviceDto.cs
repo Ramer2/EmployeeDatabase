@@ -5,8 +5,14 @@ namespace EmployeeManager.Services.dtos;
 public class UpdateDeviceDto
 {
     [Required]
-    public string Name { get; set; }
-    public string? DeviceType { get; set; }
+    [StringLength(100)]
+    public string Name { get; set; } = null!;
+    
+    [Required]
+    [StringLength(100)]
+    public string DeviceType { get; set; } = null!;
+    
+    [Required]
     public bool IsEnabled { get; set; }
-    public string AdditionalProperties { get; set; }
+    public object? AdditionalProperties { get; set; }
 }
