@@ -1,132 +1,191 @@
-﻿using System.Text.Json;
-using EmployeeManager.API;
-using EmployeeManager.Repository.interfaces;
+﻿using EmployeeManager.API;
+using EmployeeManager.Repository.context;
 using EmployeeManager.Services.dtos;
 using EmployeeManager.Services.interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeManager.Services.services;
 
 public class DeviceService : IDeviceService
 {
-    private IDeviceRepository _deviceRepository;
+    private EmployeeDatabaseContext _context;
 
-    public DeviceService(IDeviceRepository deviceRepository)
+    public DeviceService(EmployeeDatabaseContext context)
     {
-        _deviceRepository = deviceRepository;
+        _context = context;
     }
 
     public async Task<List<GetAllDeviceDto>> GetAllDevices(CancellationToken cancellationToken)
     {
-        var deviceDtos = new List<GetAllDeviceDto>();
-        var devices = await _deviceRepository.GetAllDevices(cancellationToken);
-
-        // mapping to dtos
-        foreach (var device in devices)
+        try
         {
-            deviceDtos.Add(new GetAllDeviceDto
+            var deviceDtos = new List<GetAllDeviceDto>();
+            var devices = await _context.Devices.ToListAsync(cancellationToken);
+            // mapping to dtos
+            foreach (var device in devices)
             {
-                Id = device.Id,
-                Name = device.Name
-            });
-        }
+                deviceDtos.Add(new GetAllDeviceDto
+                {
+                    Id = device.Id,
+                    Name = device.Name
+                });
+            }
 
-        return deviceDtos;
+            return deviceDtos;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Error retrieving devices", ex);
+        }
     }
 
     public async Task<GetDeviceByIdDto?> GetDeviceById(int id, CancellationToken cancellationToken)
     {
-        var device = await _deviceRepository.GetDeviceById(id, cancellationToken);
-        if (device == null) return null;
-        
-        var deviceDto = new GetDeviceByIdDto
+        try
         {
-            Name = device.Name,
-            DeviceType = device.DeviceType.Name,
-            AdditionalProperties = JsonDocument.Parse(device.AdditionalProperties).RootElement,
-            CurrentEmployee = null
-        };
+            var device = await _context.Devices
+                .Include(d => d.DeviceType)
+                .Include(de => de.DeviceEmployees)
+                .ThenInclude(emp => emp.Employee)
+                .ThenInclude(p => p.Person)
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            
+            if (device == null) return null;
         
-        var currEmployee = device.DeviceEmployees.FirstOrDefault(e => e.ReturnDate == null);
-        if (currEmployee != null)
-        {
-            deviceDto.CurrentEmployee = new GetAllEmployeeDto
+            var deviceDto = new GetDeviceByIdDto
             {
-                Id = currEmployee.Id,
-                FullName = $"{currEmployee.Employee.Person.FirstName} {currEmployee.Employee.Person.MiddleName} {currEmployee.Employee.Person.LastName}"
+                Name = device.Name,
+                DeviceType = device.DeviceType.Name,
+                AdditionalProperties = device.AdditionalProperties,
+                CurrentEmployee = null
             };
-        }
         
-        return deviceDto;
+            var currEmployee = device.DeviceEmployees.FirstOrDefault(e => e.ReturnDate == null);
+            if (currEmployee != null)
+            {
+                deviceDto.CurrentEmployee = new GetAllEmployeeDto
+                {
+                    Id = currEmployee.Id,
+                    FullName = $"{currEmployee.Employee.Person.FirstName} {currEmployee.Employee.Person.MiddleName} {currEmployee.Employee.Person.LastName}"
+                };
+            }
+        
+            return deviceDto;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Error retrieving devices", ex);
+        }
     }
 
     public async Task<bool> CreateDevice(CreateDeviceDto createDeviceDto, CancellationToken cancellationToken)
     {
-        if (createDeviceDto.DeviceType == null)
-        {
-            throw new ArgumentException("Invalid device type");
-        }
-
         if (createDeviceDto.Name == null)
         {
             throw new ArgumentException("Invalid device name");
         }
         
-        var deviceType = await _deviceRepository.GetDeviceTypeByName(createDeviceDto.DeviceType, cancellationToken);
-        if (deviceType == null)
+        if (createDeviceDto.DeviceType == null)
         {
             throw new ArgumentException("Invalid device type");
         }
         
-        var device = new Device
+        try
         {
-            Name = createDeviceDto.Name,
-            DeviceType = deviceType,
-            IsEnabled = createDeviceDto.IsEnabled,
-            AdditionalProperties = createDeviceDto.AdditionalProperties == null ? "" : createDeviceDto.AdditionalProperties
-        };
+            var deviceType = await _context.DeviceTypes
+                .FirstOrDefaultAsync(x => x.Name == createDeviceDto.DeviceType, cancellationToken);
+            
+            if (deviceType == null)
+            {
+                throw new ArgumentException("Invalid device type");
+            }
+        
+            var device = new Device
+            {
+                Name = createDeviceDto.Name,
+                DeviceType = deviceType,
+                IsEnabled = createDeviceDto.IsEnabled,
+                AdditionalProperties = (createDeviceDto.AdditionalProperties == null ? "" : createDeviceDto.AdditionalProperties) as string
+            };
 
-        await _deviceRepository.CreateDevice(device, cancellationToken);
-        return true;
+            await _context.Devices.AddAsync(device, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"Error creating a device.", ex);
+        }
     }
 
     public async Task<bool> UpdateDevice(int id, UpdateDeviceDto updateDeviceDto, CancellationToken cancellationToken)
     {
-        if (updateDeviceDto.DeviceType == null)
-        {
-            throw new ArgumentException("Invalid device type");
-        }
-        
         if (updateDeviceDto.Name == null)
         {
             throw new ArgumentException("Invalid device name");
         }
-        
-        var deviceCheck = await _deviceRepository.GetDeviceById(id, cancellationToken);
-        if (deviceCheck == null) 
-            throw new KeyNotFoundException("Device not found");
-        
-        var deviceType = await _deviceRepository.GetDeviceTypeByName(updateDeviceDto.DeviceType, cancellationToken);
-        if (deviceType == null)
+
+        if (updateDeviceDto.DeviceType == null)
         {
             throw new ArgumentException("Invalid device type");
         }
-        
-        var device = new Device
+
+        try
         {
-            Name = updateDeviceDto.Name,
-            IsEnabled = updateDeviceDto.IsEnabled,
-            DeviceType = deviceType,
-            AdditionalProperties = updateDeviceDto.AdditionalProperties == null ? "" : updateDeviceDto.AdditionalProperties
-        };
-        return await _deviceRepository.UpdateDevice(id, device, cancellationToken);
+            var device = await _context.Devices
+                .Include(d => d.DeviceType)
+                .Include(de => de.DeviceEmployees)
+                .ThenInclude(emp => emp.Employee)
+                .ThenInclude(p => p.Person)
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            
+            if (device == null)
+                throw new KeyNotFoundException("Device not found");
+
+            var deviceType = await _context.DeviceTypes
+                .FirstOrDefaultAsync(x => x.Name == updateDeviceDto.DeviceType, cancellationToken);
+            
+            if (deviceType == null)
+            {
+                throw new ArgumentException("Invalid device type");
+            }
+            
+            var updateDevice = new Device
+            {
+                Name = updateDeviceDto.Name,
+                IsEnabled = updateDeviceDto.IsEnabled,
+                DeviceType = deviceType,
+                AdditionalProperties = updateDeviceDto.AdditionalProperties == null ? "" : updateDeviceDto.AdditionalProperties
+            };
+
+            device.Name = updateDevice.Name;
+            device.IsEnabled = updateDevice.IsEnabled;
+            device.DeviceType = updateDevice.DeviceType;
+            device.AdditionalProperties = updateDevice.AdditionalProperties;
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"Error updating device with id {id}", ex);
+        }
     }
 
     public async Task<bool> DeleteDevice(int id, CancellationToken cancellationToken)
     {
-        var deviceCheck = await _deviceRepository.GetDeviceById(id, cancellationToken);
+        var deviceCheck = await GetDeviceById(id, cancellationToken);
         if (deviceCheck == null) 
             throw new KeyNotFoundException("Device not found");
         
-        return await _deviceRepository.DeleteDevice(id, cancellationToken);
+        try
+        {
+            _context.Devices.Remove(_context.Devices.FirstOrDefault(x => x.Id == id));
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"Error deleting device with id {id}", ex);
+        }
     }
 }

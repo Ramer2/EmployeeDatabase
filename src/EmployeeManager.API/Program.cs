@@ -1,6 +1,4 @@
 using EmployeeManager.Repository.context;
-using EmployeeManager.Repository.interfaces;
-using EmployeeManager.Repository.repositories;
 using EmployeeManager.Services.dtos;
 using EmployeeManager.Services.interfaces;
 using EmployeeManager.Services.services;
@@ -11,11 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("EmployeeDatabase");
 builder.Services.AddDbContext<EmployeeDatabaseContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddTransient<IDeviceRepository, DeviceRepository>();
 builder.Services.AddTransient<IDeviceService, DeviceService>();
-
 builder.Services.AddTransient<IEmployeeService, EmployeeService>();
-builder.Services.AddTransient<IEmployeeRepository, EmployeeRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -67,6 +62,10 @@ app.MapPost("/api/devices", async (IDeviceService deviceService, CancellationTok
         await deviceService.CreateDevice(createDeviceDto, cancellationToken);
         return Results.Created();
     }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
     catch (Exception ex)
     {
         return Results.Problem(ex.Message);
@@ -83,6 +82,10 @@ app.MapPut("/api/devices/{id}", async (int id, UpdateDeviceDto updateDeviceDto, 
     catch (KeyNotFoundException)
     {
         return Results.NotFound($"No device found with id: '{id}'");
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
     }
     catch (Exception ex)
     {

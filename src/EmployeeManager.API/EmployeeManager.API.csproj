@@ -18,7 +18,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\EmployeeManager.Models\EmployeeManager.Models.csproj" />
-      <ProjectReference Include="..\EmployeeManager.Repositories\EmployeeManager.Repositories.csproj" />
       <ProjectReference Include="..\EmployeeManager.Services\EmployeeManager.Services.csproj" />
     </ItemGroup>
 

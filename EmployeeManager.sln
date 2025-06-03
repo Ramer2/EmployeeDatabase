@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeManager.API", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeManager.Models", "src\EmployeeManager.Models\EmployeeManager.Models.csproj", "{D002367B-5434-4159-A103-C72AAD5BE659}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeManager.Repositories", "src\EmployeeManager.Repositories\EmployeeManager.Repositories.csproj", "{5C71C490-B26B-4502-9EAD-37B383000B2E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeManager.Services", "src\EmployeeManager.Services\EmployeeManager.Services.csproj", "{BB2219FD-DEED-455F-956C-5D538029D2DA}"
 EndProject
 Global
@@ -22,10 +20,6 @@ Global
 		{D002367B-5434-4159-A103-C72AAD5BE659}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D002367B-5434-4159-A103-C72AAD5BE659}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D002367B-5434-4159-A103-C72AAD5BE659}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5C71C490-B26B-4502-9EAD-37B383000B2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5C71C490-B26B-4502-9EAD-37B383000B2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5C71C490-B26B-4502-9EAD-37B383000B2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5C71C490-B26B-4502-9EAD-37B383000B2E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BB2219FD-DEED-455F-956C-5D538029D2DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BB2219FD-DEED-455F-956C-5D538029D2DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB2219FD-DEED-455F-956C-5D538029D2DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
