@@ -40,3 +40,14 @@ INSERT INTO DeviceEmployee (DeviceId, EmployeeId, IssueDate, ReturnDate) VALUES
 (3, 3, '2022-08-05', NULL),
 (4, 4, '2023-11-01', NULL),
 (5, 5, '2021-05-25', '2023-05-25');
+
+INSERT INTO Roles (Name) VALUES
+('Admin'),
+('User');
+
+INSERT INTO Accounts (Username, Password, EmployeeId, RoleId) VALUES
+('jdoe', 'password123', 1, 1),
+('jsmith', 'secure456', 2, 2),
+('ajohnson', 'alice789', 3, 2),
+('bbrown', 'bobpass321', 4, 2),
+('edavis', 'eve000', 5, 2);

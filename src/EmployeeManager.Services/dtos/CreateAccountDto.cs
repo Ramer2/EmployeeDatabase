@@ -5,9 +5,6 @@ namespace EmployeeManager.Services.dtos;
 public class CreateAccountDto
 {
     [Required]
-    public int Id { get; set; }
-
-    [Required]
     [StringLength(100)]
     public string Username { get; set; } = null!;
 
