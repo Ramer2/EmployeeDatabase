@@ -16,35 +16,35 @@ public class EmployeesController : ControllerBase
 
     [HttpGet]
     [Route("/api/employees")]
-    public async Task<IActionResult> GetAllEmployees(CancellationToken cancellationToken)
+    public async Task<IResult> GetAllEmployees(CancellationToken cancellationToken)
     {
         try
         {
             var employees = await _employeeService.GetAllEmployees(cancellationToken);
-            if (employees.Count == 0) return NotFound("No employees found");
-            return Ok(employees);
+            if (employees.Count == 0) return Results.NotFound("No employees found");
+            return Results.Ok(employees);
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message);
+            return Results.Problem(ex.Message);
         }
     }
 
     [HttpGet]
     [Route("/api/employees/{id}")]
-    public async Task<IActionResult> GetEmployeeById(int id, CancellationToken cancellationToken)
+    public async Task<IResult> GetEmployeeById(int id, CancellationToken cancellationToken)
     {
-        if (id < 0) return BadRequest("Invalid id");
+        if (id < 0) return Results.BadRequest("Invalid id");
         
         try
         {
             var employee = await _employeeService.GetEmployeeById(id, cancellationToken);
-            if (employee == null) return NotFound("Employee not found");
-            return Ok(employee);
+            if (employee == null) return Results.NotFound("Employee not found");
+            return Results.Ok(employee);
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message);
+            return Results.Problem(ex.Message);
         }
     }
 }
