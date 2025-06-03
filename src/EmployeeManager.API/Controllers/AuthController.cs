@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost]
-    [Route("api/auth")]
+    [Route("/api/auth")]
     public async Task<IResult> Auth(LoginUserDto user, CancellationToken cancellationToken)
     {
         var foundAccount = await _context.Accounts

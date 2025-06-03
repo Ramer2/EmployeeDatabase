@@ -1,4 +1,3 @@
-using EmployeeManager.Services.dtos;
 using EmployeeManager.Services.dtos.accounts;
 using EmployeeManager.Services.interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -20,22 +19,26 @@ public class AccountsController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpGet]
-    public async Task<IActionResult> GetAccounts()
+    [Route("/api/accounts")]
+    public async Task<IResult> GetAccounts(CancellationToken cancellationToken)
     {
         try
         {
-            
-            
-            
+            var accounts = await _accountService.GetAllAccounts(cancellationToken);
+            if (accounts.Count == 0)
+                return Results.NotFound();
+
+            return Results.Ok(accounts);
         }
         catch (Exception ex)
         {
-            return Problem(ex.Message);
+            return Results.Problem(ex.Message);
         }
     }
     
     [Authorize(Roles = "Admin")]
     [HttpPost]
+    [Route("/api/accounts")]
     public async Task<IResult> CreateAccount([FromBody] CreateAccountDto newAccount, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
@@ -55,6 +58,4 @@ public class AccountsController : ControllerBase
             return Results.Problem(ex.Message);
         }
     }
-    
-    
 }

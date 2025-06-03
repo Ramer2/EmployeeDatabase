@@ -1,6 +1,5 @@
 ﻿using EmployeeManager.Models.models;
 using EmployeeManager.Services.context;
-using EmployeeManager.Services.dtos;
 using EmployeeManager.Services.dtos.accounts;
 using EmployeeManager.Services.interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -17,7 +16,6 @@ public class AccountService : IAccountService
     {
         _context = context;
     }
-
     
     public async Task<bool> CreateAccount(CreateAccountDto createAccountDto, CancellationToken cancellationToken)
     {
@@ -54,6 +52,38 @@ public class AccountService : IAccountService
         catch (Exception ex)
         {
             throw new ApplicationException("Problem creating account", ex);
+        }
+    }
+
+    public async Task<List<GetAllAccountsDto>> GetAllAccounts(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var accounts = await _context.Accounts
+                .Include(account => account.Role)
+                .Include(acc => acc.Employee)
+                .ThenInclude(employee => employee.Person)
+                .ToListAsync(cancellationToken);
+            
+            var accountsDto = new List<GetAllAccountsDto>();
+
+            foreach (var acc in accounts)
+            {
+                accountsDto.Add(new GetAllAccountsDto
+                {
+                    Id = acc.Id,
+                    Username = acc.Username,
+                    Password = acc.Password,
+                    RoleName = acc.Role.Name,
+                    EmployeeFullName = $"{acc.Employee.Person.FirstName} {acc.Employee.Person.MiddleName} {acc.Employee.Person.LastName}"
+                });
+            }
+
+            return accountsDto;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Problem getting all accounts", ex);
         }
     }
 }
