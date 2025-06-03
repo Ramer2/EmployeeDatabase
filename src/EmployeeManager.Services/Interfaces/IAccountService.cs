@@ -1,4 +1,5 @@
 ﻿using EmployeeManager.Services.dtos;
+using EmployeeManager.Services.dtos.accounts;
 
 namespace EmployeeManager.Services.interfaces;
 

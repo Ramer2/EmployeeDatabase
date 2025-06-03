@@ -1,5 +1,7 @@
 using EmployeeManager.Services.dtos;
+using EmployeeManager.Services.dtos.accounts;
 using EmployeeManager.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManager.API.controllers;
@@ -10,12 +12,29 @@ public class AccountsController : ControllerBase
 {
     
     private readonly IAccountService _accountService;
-
+    
     public AccountsController(IAccountService accountService)
     {
         _accountService = accountService;
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpGet]
+    public async Task<IActionResult> GetAccounts()
+    {
+        try
+        {
+            
+            
+            
+        }
+        catch (Exception ex)
+        {
+            return Problem(ex.Message);
+        }
+    }
+    
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IResult> CreateAccount([FromBody] CreateAccountDto newAccount, CancellationToken cancellationToken)
     {
@@ -36,4 +55,6 @@ public class AccountsController : ControllerBase
             return Results.Problem(ex.Message);
         }
     }
+    
+    
 }

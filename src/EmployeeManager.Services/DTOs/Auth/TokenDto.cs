@@ -1,4 +1,4 @@
-﻿namespace EmployeeManager.Services.dtos;
+﻿namespace EmployeeManager.Services.dtos.auth;
 
 public class TokenDto
 {

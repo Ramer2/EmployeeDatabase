@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EmployeeManager.Services.dtos;
+namespace EmployeeManager.Services.dtos.devices;
 
 public class UpdateDeviceDto
 {

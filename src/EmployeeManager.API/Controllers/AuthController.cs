@@ -1,6 +1,7 @@
 using EmployeeManager.Models.models;
 using EmployeeManager.Services.context;
 using EmployeeManager.Services.dtos;
+using EmployeeManager.Services.dtos.auth;
 using EmployeeManager.Services.services.Tokens;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

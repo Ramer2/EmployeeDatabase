@@ -1,5 +1,6 @@
 ﻿using EmployeeManager.Services.context;
 using EmployeeManager.Services.dtos;
+using EmployeeManager.Services.dtos.employees;
 using EmployeeManager.Services.interfaces;
 using Microsoft.EntityFrameworkCore;
 

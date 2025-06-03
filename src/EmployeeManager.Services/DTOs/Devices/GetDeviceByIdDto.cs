@@ -1,4 +1,6 @@
-﻿namespace EmployeeManager.Services.dtos;
+﻿using EmployeeManager.Services.dtos.employees;
+
+namespace EmployeeManager.Services.dtos.devices;
 
 public class GetDeviceByIdDto
 {

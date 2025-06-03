@@ -1,4 +1,5 @@
 ﻿using EmployeeManager.Services.dtos;
+using EmployeeManager.Services.dtos.devices;
 using EmployeeManager.Services.interfaces;
 using Microsoft.AspNetCore.Mvc;
 

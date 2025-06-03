@@ -1,6 +1,7 @@
 ﻿using EmployeeManager.Models.models;
 using EmployeeManager.Services.context;
 using EmployeeManager.Services.dtos;
+using EmployeeManager.Services.dtos.accounts;
 using EmployeeManager.Services.interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
