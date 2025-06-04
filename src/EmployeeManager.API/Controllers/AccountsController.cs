@@ -35,6 +35,26 @@ public class AccountsController : ControllerBase
             return Results.Problem(ex.Message);
         }
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet]
+    [Route("/api/accounts/{id}")]
+    public async Task<IResult> GetAccountById(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var account = await _accountService.GetSpecificAccount(id, cancellationToken);
+            return Results.Ok(account);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message);
+        }
+    }
     
     [Authorize(Roles = "Admin")]
     [HttpPost]
@@ -62,14 +82,34 @@ public class AccountsController : ControllerBase
     [Authorize(Roles = "Admin")]
     [HttpPut]
     [Route("/api/accounts/{id}")]
-    public async Task<IResult> UpdateAccount([FromBody] UpdateAccountDto account, CancellationToken cancellationToken)
+    public async Task<IResult> UpdateAccount(int id, [FromBody] UpdateAccountDto account, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return Results.BadRequest(ModelState);
 
         try
         {
-            await _accountService.UpdateAccount(account, cancellationToken);
+            await _accountService.UpdateAccount(id, account, cancellationToken);
+            return Results.Ok();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message);
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpDelete]
+    [Route("/api/accounts/{id}")]
+    public async Task<IResult> DeleteAccount(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _accountService.DeleteAccount(id, cancellationToken);
             return Results.Ok();
         }
         catch (KeyNotFoundException ex)

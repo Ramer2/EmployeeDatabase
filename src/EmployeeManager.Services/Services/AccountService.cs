@@ -16,7 +16,73 @@ public class AccountService : IAccountService
     {
         _context = context;
     }
-    
+
+    public async Task<List<GetAllAccountsDto>> GetAllAccounts(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var accounts = await _context.Accounts
+                .Include(account => account.Role)
+                .Include(acc => acc.Employee)
+                .ThenInclude(employee => employee.Person)
+                .ToListAsync(cancellationToken);
+            
+            var accountsDto = new List<GetAllAccountsDto>();
+
+            foreach (var acc in accounts)
+            {
+                accountsDto.Add(new GetAllAccountsDto
+                {
+                    Id = acc.Id,
+                    Username = acc.Username,
+                    Password = acc.Password,
+                    RoleName = acc.Role.Name,
+                    EmployeeFullName = $"{acc.Employee.Person.FirstName} {acc.Employee.Person.MiddleName} {acc.Employee.Person.LastName}"
+                });
+            }
+
+            return accountsDto;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Problem getting all accounts", ex);
+        }
+    }
+
+    public async Task<GetSpecificAccountDto> GetSpecificAccount(int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var account = await _context.Accounts
+                .Include(acc => acc.Role)
+                .Include(acc => acc.Employee)
+                .ThenInclude(employee => employee.Person)
+                .Where(acc => acc.Id == id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (account == null)
+                throw new KeyNotFoundException($"Account with id {id} not found");
+            
+            return new GetSpecificAccountDto
+            {
+                Id = account.Id,
+                Username = account.Username,
+                Password = account.Password,
+                RoleName = account.Role.Name,
+                EmployeeFullName =
+                    $"{account.Employee.Person.FirstName} {account.Employee.Person.MiddleName} {account.Employee.Person.LastName}"
+            };
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Problem getting specific account", ex);
+        }
+    }
+
     public async Task<bool> CreateAccount(CreateAccountDto createAccountDto, CancellationToken cancellationToken)
     {
         try
@@ -59,39 +125,7 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<List<GetAllAccountsDto>> GetAllAccounts(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var accounts = await _context.Accounts
-                .Include(account => account.Role)
-                .Include(acc => acc.Employee)
-                .ThenInclude(employee => employee.Person)
-                .ToListAsync(cancellationToken);
-            
-            var accountsDto = new List<GetAllAccountsDto>();
-
-            foreach (var acc in accounts)
-            {
-                accountsDto.Add(new GetAllAccountsDto
-                {
-                    Id = acc.Id,
-                    Username = acc.Username,
-                    Password = acc.Password,
-                    RoleName = acc.Role.Name,
-                    EmployeeFullName = $"{acc.Employee.Person.FirstName} {acc.Employee.Person.MiddleName} {acc.Employee.Person.LastName}"
-                });
-            }
-
-            return accountsDto;
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException("Problem getting all accounts", ex);
-        }
-    }
-
-    public async Task<bool> UpdateAccount(UpdateAccountDto updateAccountDto, CancellationToken cancellationToken)
+    public async Task<bool> UpdateAccount(int id, UpdateAccountDto updateAccountDto, CancellationToken cancellationToken)
     {
         try
         {
@@ -112,8 +146,8 @@ public class AccountService : IAccountService
 
             var account = await _context.Accounts
                 .Include(acc => acc.Employee)
-                .ThenInclude(employee => employee.Person)
-                .Where(acc => acc.Employee.Person.Email == updateAccountDto.Email)
+                .ThenInclude(emp => emp.Person)
+                .Where(acc => acc.Id == id)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (account == null)
@@ -137,11 +171,20 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<bool> DeleteAccount(string email, CancellationToken cancellationToken)
+    public async Task<bool> DeleteAccount(int accountId, CancellationToken cancellationToken)
     {
         try
         {
-            throw new NotImplementedException();
+            var account = await _context.Accounts
+                .Where(a => a.Id == accountId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (account == null)
+                throw new KeyNotFoundException($"Account with id {accountId} does not exist.");
+            
+            _context.Accounts.Remove(account);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
         }
         catch (KeyNotFoundException)
         {
