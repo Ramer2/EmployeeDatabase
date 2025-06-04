@@ -67,7 +67,7 @@ public class AccountsController : ControllerBase
         try
         {
             await _accountService.CreateAccount(newAccount, cancellationToken);
-            return Results.Ok();
+            return Results.Created();
         }
         catch (KeyNotFoundException ex)
         {
