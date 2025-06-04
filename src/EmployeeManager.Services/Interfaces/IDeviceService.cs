@@ -1,5 +1,4 @@
-﻿using EmployeeManager.Services.dtos;
-using EmployeeManager.Services.dtos.devices;
+﻿using EmployeeManager.Services.dtos.devices;
 
 namespace EmployeeManager.Services.interfaces;
 
@@ -14,4 +13,6 @@ public interface IDeviceService
     public Task<bool> UpdateDevice(int id, UpdateDeviceDto updateDeviceDto, CancellationToken cancellationToken);
     
     public Task<bool> DeleteDevice(int id, CancellationToken cancellationToken);
+    
+    public Task<bool> UpdateUsersDevice(string email, UpdateDeviceDto updateDeviceDto, int id, CancellationToken cancellationToken);
 }

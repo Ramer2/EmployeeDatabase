@@ -1,6 +1,5 @@
 ﻿using EmployeeManager.Models.models;
 using EmployeeManager.Services.context;
-using EmployeeManager.Services.dtos;
 using EmployeeManager.Services.dtos.devices;
 using EmployeeManager.Services.dtos.employees;
 using EmployeeManager.Services.interfaces;
@@ -119,7 +118,7 @@ public class DeviceService : IDeviceService
             throw new ApplicationException($"Error creating a device.", ex);
         }
     }
-
+    
     public async Task<bool> UpdateDevice(int id, UpdateDeviceDto updateDeviceDto, CancellationToken cancellationToken)
     {
         if (updateDeviceDto.Name == null)
@@ -188,6 +187,50 @@ public class DeviceService : IDeviceService
         catch (Exception ex)
         {
             throw new ApplicationException($"Error deleting device with id {id}", ex);
+        }
+    }
+
+    public async Task<bool> UpdateUsersDevice(string email, UpdateDeviceDto updateDeviceDto, int id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await _context.Employees
+                .Include(emp => emp.Person)
+                .Include(emp => emp.DeviceEmployees)
+                .ThenInclude(de => de.Device)
+                .Where(emp => emp.Person.Email == email)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (user == null)
+                throw new KeyNotFoundException($"No user found with email {email}");
+            
+            var device = user.DeviceEmployees.FirstOrDefault(de => de.Device.Id == id);
+            
+            if (device == null)
+                throw new KeyNotFoundException($"Device with id {id} not found");
+            
+            var deviceType = await _context.DeviceTypes
+                .FirstOrDefaultAsync(x => x.Name == updateDeviceDto.DeviceType, cancellationToken);
+            
+            if (deviceType == null)
+                throw new ArgumentException($"Device type {updateDeviceDto.DeviceType} not found");
+            
+            device.Device.Name = updateDeviceDto.Name;
+            device.Device.DeviceType = deviceType;
+            device.Device.IsEnabled = updateDeviceDto.IsEnabled;
+            device.Device.AdditionalProperties = (updateDeviceDto.AdditionalProperties == null ? "" : updateDeviceDto.AdditionalProperties).ToString();
+
+            _context.Update(user);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException($"Error updating device for email {email}", ex);
         }
     }
 }

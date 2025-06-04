@@ -1,4 +1,5 @@
-﻿using EmployeeManager.Services.dtos.devices;
+﻿using System.Security.Claims;
+using EmployeeManager.Services.dtos.devices;
 using EmployeeManager.Services.interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -75,7 +76,7 @@ public class DevicesController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,User")]
     [HttpPut]
     [Route("/api/devices/{id}")]
     public async Task<IResult> UpdateDevice(int id, [FromBody] UpdateDeviceDto dto, CancellationToken cancellationToken)
@@ -84,23 +85,49 @@ public class DevicesController : ControllerBase
             return Results.BadRequest(ModelState);
         
         if (id < 0) return Results.BadRequest("Invalid id");
-        
-        try
+
+        if (User.IsInRole("Admin"))
         {
-            await _deviceService.UpdateDevice(id, dto, cancellationToken);
-            return Results.Ok();
+            try
+            {
+                await _deviceService.UpdateDevice(id, dto, cancellationToken);
+                return Results.Ok();
+            }
+            catch (KeyNotFoundException)
+            {
+                return Results.NotFound($"No device found with id: '{id}'");
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }            
         }
-        catch (KeyNotFoundException)
+        else
         {
-            return Results.NotFound($"No device found with id: '{id}'");
-        }
-        catch (ArgumentException ex)
-        {
-            return Results.BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem(ex.Message);
+            try
+            {
+                var email = User.FindFirst(ClaimTypes.Email).Value;
+            
+                await _deviceService.UpdateUsersDevice(email, dto, id, cancellationToken);
+                return Results.Ok();                
+            }
+            catch (KeyNotFoundException)
+            {
+                return Results.NotFound($"No device found with id: '{id}'");
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                return Results.Problem(ex.Message);
+            }
         }
     }
 
