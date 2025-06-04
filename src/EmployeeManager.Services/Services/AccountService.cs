@@ -249,6 +249,7 @@ public class AccountService : IAccountService
             {
                 deviceDtos.Add(new ViewDeviceDto
                 {
+                    Id = device.Device.Id,
                     Name = device.Device.Name,
                     DeviceType = device.Device.DeviceType.Name,
                     IsEnabled = device.Device.IsEnabled,
