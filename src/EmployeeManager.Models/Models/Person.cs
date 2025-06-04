@@ -1,4 +1,6 @@
-﻿namespace EmployeeManager.Models.models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EmployeeManager.Models.models;
 
 public partial class Person
 {
@@ -14,7 +16,9 @@ public partial class Person
 
     public string PhoneNumber { get; set; } = null!;
 
+    [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
     public string Email { get; set; } = null!;
 
+    [RegularExpression(@"^\+?[0-9\s\-]{7,15}$")]
     public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 }

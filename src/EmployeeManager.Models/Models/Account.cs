@@ -9,10 +9,12 @@ public class Account
 
     [Required]
     [StringLength(100)]
+    [RegularExpression(@"^[^\d][\w\d_]{2,}$")]
     public string Username { get; set; } = null!;
 
     [Required]
     [StringLength(100)]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$")]
     public string Password { get; set; } = null!;
 
     [Required]
