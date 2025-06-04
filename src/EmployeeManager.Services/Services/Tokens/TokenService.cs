@@ -16,7 +16,7 @@ public class TokenService : ITokenService
         _jwtOptions = jwtOptions.Value;
     }
 
-    public string GenerateToken(string username, string role)
+    public string GenerateToken(string username, string role, string email)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_jwtOptions.Key);
@@ -25,7 +25,8 @@ public class TokenService : ITokenService
         {
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Sub, username),
-            new("role", role)
+            new("role", role),
+            new(ClaimTypes.Email, email)
         };
 
         var tokenDescriptor = new SecurityTokenDescriptor

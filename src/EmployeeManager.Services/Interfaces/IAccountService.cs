@@ -13,4 +13,6 @@ public interface IAccountService
     public Task<bool> UpdateAccount(int id, UpdateAccountDto updateAccountDto, CancellationToken cancellationToken);
     
     public Task<bool> DeleteAccount(int accountId, CancellationToken cancellationToken);
+    
+    public Task<ViewAccountDto> ViewAccount(string email, CancellationToken cancellationToken);
 }

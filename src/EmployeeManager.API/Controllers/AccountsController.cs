@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using EmployeeManager.Services.dtos.accounts;
 using EmployeeManager.Services.interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,6 @@ namespace EmployeeManager.API.controllers;
 [ApiController]
 public class AccountsController : ControllerBase
 {
-    
     private readonly IAccountService _accountService;
     
     public AccountsController(IAccountService accountService)
@@ -17,18 +17,31 @@ public class AccountsController : ControllerBase
         _accountService = accountService;
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,User")]
     [HttpGet]
     [Route("/api/accounts")]
     public async Task<IResult> GetAccounts(CancellationToken cancellationToken)
     {
         try
         {
-            var accounts = await _accountService.GetAllAccounts(cancellationToken);
-            if (accounts.Count == 0)
-                return Results.NotFound();
+            if (User.IsInRole("Admin"))
+            {
+                var accounts = await _accountService.GetAllAccounts(cancellationToken);
+                if (accounts.Count == 0)
+                    return Results.NotFound();
 
-            return Results.Ok(accounts);
+                return Results.Ok(accounts);                
+            }
+            else
+            { 
+                if (User.FindFirst(ClaimTypes.Email) == null) 
+                    return Results.Problem("Invalid credentials");
+                
+                var res = await _accountService
+                    .ViewAccount(User.FindFirst(ClaimTypes.Email).Value, cancellationToken);
+                
+                return Results.Ok(res);
+            }
         }
         catch (Exception ex)
         {

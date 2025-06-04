@@ -195,4 +195,33 @@ public class AccountService : IAccountService
             throw new ApplicationException("Problem deleting account", ex);
         }
     }
+
+    public async Task<ViewAccountDto> ViewAccount(string email, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await _context.Accounts
+                .Include(acc => acc.Employee)
+                .ThenInclude(emp => emp.Person)
+                .Where(acc => acc.Employee.Person.Email == email)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (user == null) 
+                throw new KeyNotFoundException($"No employee with email {email} exists.");
+
+            return new ViewAccountDto
+            {
+                Username = user.Username,
+                Email = user.Employee.Person.Email,
+                FullName = 
+                    $"{user.Employee.Person.FirstName} {user.Employee.Person.MiddleName} {user.Employee.Person.LastName}",
+                PhoneNumber = user.Employee.Person.PhoneNumber,
+                HireDate = user.Employee.HireDate.ToString(),
+                PassportNumber = user.Employee.Person.PassportNumber
+            };
+        } catch (Exception ex)
+        {
+            throw new ApplicationException("Error while retrieving data for the User", ex);
+        }
+    }
 }

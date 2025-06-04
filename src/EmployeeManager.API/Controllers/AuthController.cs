@@ -29,6 +29,8 @@ public class AuthController : ControllerBase
     {
         var foundAccount = await _context.Accounts
             .Include(a => a.Role)
+            .Include(acc => acc.Employee)
+            .ThenInclude(e => e.Person)
             .FirstOrDefaultAsync(a => string.Equals(a.Username, user.Username), cancellationToken);
         
         if (foundAccount == null)
@@ -40,7 +42,10 @@ public class AuthController : ControllerBase
 
         var token = new TokenDto
         {
-            AccessToken = _tokenService.GenerateToken(foundAccount.Password, foundAccount.Role.Name)
+            AccessToken = _tokenService.GenerateToken(
+                foundAccount.Password, 
+                foundAccount.Role.Name, 
+                foundAccount.Employee.Person.Email)
         };
         return Results.Ok(token);
     }
