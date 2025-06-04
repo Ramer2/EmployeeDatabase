@@ -125,7 +125,6 @@ public class DevicesController : ControllerBase
             }
             catch (Exception ex)
             {
-                throw ex;
                 return Results.Problem(ex.Message);
             }
         }
