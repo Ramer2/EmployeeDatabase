@@ -158,5 +158,36 @@ public class AccountsController : ControllerBase
         {
             return Results.Problem(ex.Message);
         }
-    } 
+    }
+
+    [Authorize(Roles = "User")]
+    [HttpPut]
+    [Route("/api/accounts")]
+    public async Task<IResult> UpdatePersonalData([FromBody] UpdatePersonalDto personalData,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+            if (email == null) 
+                return Results.Problem("Invalid credentials");
+
+            await _accountService.UpdatePersonalData(email, personalData, cancellationToken);
+            
+            return Results.Ok();
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(ex);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message);
+        }
+    }
 }

@@ -268,4 +268,44 @@ public class AccountService : IAccountService
             throw new ApplicationException("Error while retrieving device data for the User", ex);
         }
     }
+
+    public async Task<bool> UpdatePersonalData(string email, UpdatePersonalDto personalData, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var user = await _context.Accounts
+                .Include(acc => acc.Employee)
+                .ThenInclude(emp => emp.Person)
+                .Where(acc => acc.Employee.Person.Email == email)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (user == null)
+                throw new KeyNotFoundException($"No user with email {email} exists.");
+            
+            user.Username = personalData.Username;
+            user.Password = _passwordHasher.HashPassword(user, personalData.Password);
+            user.Employee.Person.FirstName = personalData.FirstName;
+            user.Employee.Person.MiddleName = personalData.MiddleName;
+            user.Employee.Person.LastName = personalData.LastName;
+            user.Employee.Person.PhoneNumber = personalData.PhoneNumber;
+            user.Employee.Person.Email = personalData.Email;
+            user.Employee.Person.PassportNumber = personalData.PassportNumber;
+            
+            _context.Accounts.Update(user);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (ArgumentException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Error while updating personal data", ex);
+        }
+    }
 }
