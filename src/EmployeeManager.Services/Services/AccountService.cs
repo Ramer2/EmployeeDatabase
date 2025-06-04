@@ -27,11 +27,11 @@ public class AccountService : IAccountService
 
             if (employee == null)
                 throw new KeyNotFoundException($"No employee with email {createAccountDto.Email} exists.");
-            
+
             var role = await _context.Roles
                 .Where(r => r.Name == createAccountDto.RoleName)
                 .FirstOrDefaultAsync(cancellationToken);
-            
+
             if (role == null)
                 throw new KeyNotFoundException($"No role with role {createAccountDto.RoleName} exists.");
 
@@ -42,12 +42,16 @@ public class AccountService : IAccountService
                 Employee = employee,
                 Role = role
             };
-            
+
             account.Password = _passwordHasher.HashPassword(account, createAccountDto.Password);
-            
+
             await _context.Accounts.AddAsync(account, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             return true;
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -84,6 +88,68 @@ public class AccountService : IAccountService
         catch (Exception ex)
         {
             throw new ApplicationException("Problem getting all accounts", ex);
+        }
+    }
+
+    public async Task<bool> UpdateAccount(UpdateAccountDto updateAccountDto, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var employee = await _context.Employees
+                .Include(emp => emp.Person)
+                .Where(emp => emp.Person.Email == updateAccountDto.Email)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (employee == null)
+                throw new KeyNotFoundException($"Employee with email {updateAccountDto.Email} does not exist.");
+            
+            var role = await _context.Roles
+                .Where(r => r.Name == updateAccountDto.RoleName)
+                .FirstOrDefaultAsync(cancellationToken);
+            
+            if (role == null)
+                throw new KeyNotFoundException($"No role with role {updateAccountDto.RoleName} exists.");
+
+            var account = await _context.Accounts
+                .Include(acc => acc.Employee)
+                .ThenInclude(employee => employee.Person)
+                .Where(acc => acc.Employee.Person.Email == updateAccountDto.Email)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (account == null)
+                throw new KeyNotFoundException($"No account with email {updateAccountDto.Email} exists.");
+            
+            account.Username = updateAccountDto.Username;
+            account.Password = _passwordHasher.HashPassword(account, updateAccountDto.Password);
+            account.Employee = employee;
+            account.Role = role;
+            _context.Accounts.Update(account);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Problem updating account", ex);
+        }
+    }
+
+    public async Task<bool> DeleteAccount(string email, CancellationToken cancellationToken)
+    {
+        try
+        {
+            throw new NotImplementedException();
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Problem deleting account", ex);
         }
     }
 }

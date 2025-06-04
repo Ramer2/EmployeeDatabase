@@ -7,4 +7,6 @@ public interface IAccountService
     public Task<bool> CreateAccount(CreateAccountDto createAccountDto, CancellationToken cancellationToken);
     
     public Task<List<GetAllAccountsDto>> GetAllAccounts(CancellationToken cancellationToken);
+    
+    public Task<bool> UpdateAccount(UpdateAccountDto updateAccountDto, CancellationToken cancellationToken);
 }

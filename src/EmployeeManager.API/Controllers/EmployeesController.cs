@@ -1,4 +1,5 @@
 ﻿using EmployeeManager.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManager.API.controllers;
@@ -14,6 +15,7 @@ public class EmployeesController : ControllerBase
         _employeeService = employeeService;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     [Route("/api/employees")]
     public async Task<IResult> GetAllEmployees(CancellationToken cancellationToken)
@@ -30,6 +32,7 @@ public class EmployeesController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     [Route("/api/employees/{id}")]
     public async Task<IResult> GetEmployeeById(int id, CancellationToken cancellationToken)

@@ -1,6 +1,6 @@
-﻿using EmployeeManager.Services.dtos;
-using EmployeeManager.Services.dtos.devices;
+﻿using EmployeeManager.Services.dtos.devices;
 using EmployeeManager.Services.interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManager.API.controllers;
@@ -16,6 +16,7 @@ public class DevicesController : ControllerBase
         _deviceService = deviceService;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     [Route("/api/devices")]
     public async Task<IResult> GetAllDevices(CancellationToken cancellationToken)
@@ -32,6 +33,7 @@ public class DevicesController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     [Route("/api/devices/{id}")]
     public async Task<IResult> GetDeviceById(int id, CancellationToken cancellationToken)
@@ -50,6 +52,7 @@ public class DevicesController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [Route("/api/devices")]
     public async Task<IResult> CreateDevice([FromBody] CreateDeviceDto dto, CancellationToken cancellationToken)
@@ -72,6 +75,7 @@ public class DevicesController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut]
     [Route("/api/devices/{id}")]
     public async Task<IResult> UpdateDevice(int id, [FromBody] UpdateDeviceDto dto, CancellationToken cancellationToken)
@@ -100,6 +104,7 @@ public class DevicesController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete]
     [Route("/api/devices/{id}")]
     public async Task<IResult> DeleteDevice(int id, CancellationToken cancellationToken)

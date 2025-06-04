@@ -58,4 +58,27 @@ public class AccountsController : ControllerBase
             return Results.Problem(ex.Message);
         }
     }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPut]
+    [Route("/api/accounts/{id}")]
+    public async Task<IResult> UpdateAccount([FromBody] UpdateAccountDto account, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+            return Results.BadRequest(ModelState);
+
+        try
+        {
+            await _accountService.UpdateAccount(account, cancellationToken);
+            return Results.Ok();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message);
+        }
+    }
 }
