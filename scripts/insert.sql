@@ -1,3 +1,5 @@
+-- DEPRECATED. DO NOT USE
+
 INSERT INTO DeviceType (Name) VALUES
 ('PC'),
 ('Smartwatch'),

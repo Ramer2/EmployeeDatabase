@@ -1,3 +1,4 @@
+-- DEPRECATED. DO NOT USE
 
 CREATE TABLE DeviceType (
     Id             INT           NOT NULL IDENTITY(1,1),
