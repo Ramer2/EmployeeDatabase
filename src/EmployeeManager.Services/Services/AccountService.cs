@@ -1,6 +1,7 @@
 ﻿using EmployeeManager.Models.models;
 using EmployeeManager.Services.context;
 using EmployeeManager.Services.dtos.accounts;
+using EmployeeManager.Services.dtos.devices;
 using EmployeeManager.Services.interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -222,6 +223,48 @@ public class AccountService : IAccountService
         } catch (Exception ex)
         {
             throw new ApplicationException("Error while retrieving data for the User", ex);
+        }
+    }
+
+    public async Task<List<ViewDeviceDto>> ViewAssignedDevices(string email, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var deviceDtos = new List<ViewDeviceDto>();
+            var employee = await _context.Employees
+                .Include(emp => emp.Person)
+                .Include(emp => emp.DeviceEmployees)
+                .ThenInclude(de => de.Device)
+                .ThenInclude(d => d.DeviceType)
+                .Where(emp => emp.Person.Email == email)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (employee == null) 
+                throw new KeyNotFoundException($"Employee with email {email} does not exist.");
+            
+            if (employee.DeviceEmployees.Count == 0)
+                throw new KeyNotFoundException($"No devices for employee with email {email} exist.");
+            
+            foreach (var device in employee.DeviceEmployees)
+            {
+                deviceDtos.Add(new ViewDeviceDto
+                {
+                    Name = device.Device.Name,
+                    DeviceType = device.Device.DeviceType.Name,
+                    IsEnabled = device.Device.IsEnabled,
+                    AdditionalProperties = device.Device.AdditionalProperties
+                });                
+            }
+
+            return deviceDtos;
+        }
+        catch (KeyNotFoundException ex)
+        {
+            throw new KeyNotFoundException(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Error while retrieving device data for the User", ex);
         }
     }
 }

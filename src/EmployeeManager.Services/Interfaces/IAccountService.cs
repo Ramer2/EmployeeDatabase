@@ -1,4 +1,5 @@
 ﻿using EmployeeManager.Services.dtos.accounts;
+using EmployeeManager.Services.dtos.devices;
 
 namespace EmployeeManager.Services.interfaces;
 
@@ -15,4 +16,6 @@ public interface IAccountService
     public Task<bool> DeleteAccount(int accountId, CancellationToken cancellationToken);
     
     public Task<ViewAccountDto> ViewAccount(string email, CancellationToken cancellationToken);
+    
+    public Task<List<ViewDeviceDto>> ViewAssignedDevices(string email, CancellationToken cancellationToken);
 }

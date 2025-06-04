@@ -134,4 +134,29 @@ public class AccountsController : ControllerBase
             return Results.Problem(ex.Message);
         }
     }
+
+    [Authorize(Roles = "User")]
+    [HttpGet]
+    [Route("/api/accounts/devices")]
+    public async Task<IResult> GetAssignedDevices(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            
+            if (email == null) 
+                return Results.Problem("Invalid credentials");
+
+            var devices = await _accountService.ViewAssignedDevices(email, cancellationToken);
+            return Results.Ok(devices);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message);
+        }
+    } 
 }
