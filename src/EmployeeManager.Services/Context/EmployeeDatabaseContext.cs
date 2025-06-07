@@ -148,7 +148,8 @@ public partial class EmployeeDatabaseContext : DbContext
         
             entity.Property(e => e.Username)
                 .IsRequired()
-                .HasMaxLength(100);
+                .HasMaxLength(100)
+                .IsUnicode();
         
             entity.Property(e => e.Password)
                 .IsRequired()
