@@ -58,10 +58,8 @@ public class AccountsController : ControllerBase
                 
                 return Results.Ok(res);
             }
-
-
         }
-        catch (ApplicationException)
+        catch (AccessViolationException)
         {
             return Results.Forbid();
         }
@@ -98,7 +96,7 @@ public class AccountsController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,User")]
     [HttpPut]
     [Route("/api/accounts/{id}")]
     public async Task<IResult> UpdateAccount(int id, [FromBody] UpdateAccountDto account, CancellationToken cancellationToken)
@@ -108,8 +106,30 @@ public class AccountsController : ControllerBase
 
         try
         {
-            await _accountService.UpdateAccount(id, account, cancellationToken);
-            return Results.Ok();
+
+            if (User.IsInRole("Admin")) // Admin
+            {
+                await _accountService.UpdateAccount(id, account, cancellationToken);
+                return Results.Ok();                
+            }
+            else // User - check id
+            {
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+                
+                if (email == null) 
+                    return Results.Problem("Invalid credentials");
+                
+                await _accountService.UpdateUsersData(email, id, account, cancellationToken);
+                return Results.Ok();
+            }
+        }
+        catch (AccessViolationException)
+        {
+            return Results.Forbid();
+        }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(ex);
         }
         catch (KeyNotFoundException ex)
         {
@@ -155,37 +175,6 @@ public class AccountsController : ControllerBase
 
             var devices = await _accountService.ViewAssignedDevices(email, cancellationToken);
             return Results.Ok(devices);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return Results.NotFound(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem(ex.Message);
-        }
-    }
-
-    [Authorize(Roles = "User")]
-    [HttpPut]
-    [Route("/api/accounts")]
-    public async Task<IResult> UpdatePersonalData([FromBody] UpdatePersonalDto personalData,
-        CancellationToken cancellationToken)
-    {
-        try
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            
-            if (email == null) 
-                return Results.Problem("Invalid credentials");
-
-            await _accountService.UpdatePersonalData(email, personalData, cancellationToken);
-            
-            return Results.Ok();
-        }
-        catch (ArgumentException ex)
-        {
-            return Results.BadRequest(ex);
         }
         catch (KeyNotFoundException ex)
         {

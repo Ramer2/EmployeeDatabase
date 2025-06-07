@@ -207,25 +207,34 @@ public class AccountService : IAccountService
                 .Where(acc => acc.Employee.Person.Email == email)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (user == null) 
+            if (user == null)
                 throw new KeyNotFoundException($"No employee with email {email} exists.");
 
             if (user.Id != id)
-                throw new ApplicationException("User can have access only to their own account.");
+                throw new AccessViolationException("User can have access only to their own account.");
 
             return new ViewAccountDto
             {
                 Username = user.Username,
                 Email = user.Employee.Person.Email,
-                FullName = 
+                FullName =
                     $"{user.Employee.Person.FirstName} {user.Employee.Person.MiddleName} {user.Employee.Person.LastName}",
                 PhoneNumber = user.Employee.Person.PhoneNumber,
                 HireDate = user.Employee.HireDate.ToString(),
                 PassportNumber = user.Employee.Person.PassportNumber
             };
-        } catch (Exception ex)
+        }
+        catch (AccessViolationException)
         {
-            throw new ApplicationException("Error while retrieving data for the User", ex);
+            throw;
+        }
+        catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("Error while retrieving device data for the User", ex);
         }
     }
 
@@ -262,9 +271,9 @@ public class AccountService : IAccountService
 
             return deviceDtos;
         }
-        catch (KeyNotFoundException ex)
+        catch (KeyNotFoundException)
         {
-            throw new KeyNotFoundException(ex.Message);
+            throw;
         }
         catch (Exception ex)
         {
@@ -272,11 +281,13 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<bool> UpdatePersonalData(string email, UpdatePersonalDto personalData, CancellationToken cancellationToken)
+    // only for User
+    public async Task<bool> UpdateUsersData(string email, int id, UpdateAccountDto updateDto, CancellationToken cancellationToken)
     {
         try
         {
             var user = await _context.Accounts
+                .Include(acc => acc.Role)
                 .Include(acc => acc.Employee)
                 .ThenInclude(emp => emp.Person)
                 .Where(acc => acc.Employee.Person.Email == email)
@@ -285,20 +296,31 @@ public class AccountService : IAccountService
             if (user == null)
                 throw new KeyNotFoundException($"No user with email {email} exists.");
             
-            user.Username = personalData.Username;
-            user.Password = _passwordHasher.HashPassword(user, personalData.Password);
-            user.Employee.Person.FirstName = personalData.FirstName;
-            user.Employee.Person.MiddleName = personalData.MiddleName;
-            user.Employee.Person.LastName = personalData.LastName;
-            user.Employee.Person.PhoneNumber = personalData.PhoneNumber;
-            user.Employee.Person.Email = personalData.Email;
-            user.Employee.Person.PassportNumber = personalData.PassportNumber;
+            if (user.Id != id)
+                throw new AccessViolationException("User can have access only to their own account.");
+            
+            if (user.Role.Name != updateDto.RoleName)
+                throw new AccessViolationException("User can't change their role.");
+
+            var role = await _context.Roles
+                .FirstOrDefaultAsync(r => r.Name.Equals(updateDto.RoleName), cancellationToken);
+            
+            if (role == null)
+                throw new KeyNotFoundException($"Role with name {updateDto.RoleName} does not exist.");
+            
+            user.Username = updateDto.Username;
+            user.Password = _passwordHasher.HashPassword(user, updateDto.Password);
+            user.Role = role;
             
             _context.Accounts.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
         catch (KeyNotFoundException)
+        {
+            throw;
+        }
+        catch (AccessViolationException)
         {
             throw;
         }

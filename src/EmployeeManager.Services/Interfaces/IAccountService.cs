@@ -19,5 +19,5 @@ public interface IAccountService
     
     public Task<List<ViewDeviceDto>> ViewAssignedDevices(string email, CancellationToken cancellationToken);
     
-    public Task<bool> UpdatePersonalData(string email, UpdatePersonalDto personalData, CancellationToken cancellationToken);
+    public Task<bool> UpdateUsersData(string email, int id, UpdateAccountDto updateDto, CancellationToken cancellationToken);
 }
