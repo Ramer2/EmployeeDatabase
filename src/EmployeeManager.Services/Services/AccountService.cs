@@ -238,49 +238,6 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<List<ViewDeviceDto>> ViewAssignedDevices(string email, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var deviceDtos = new List<ViewDeviceDto>();
-            var employee = await _context.Employees
-                .Include(emp => emp.Person)
-                .Include(emp => emp.DeviceEmployees)
-                .ThenInclude(de => de.Device)
-                .ThenInclude(d => d.DeviceType)
-                .Where(emp => emp.Person.Email == email)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (employee == null) 
-                throw new KeyNotFoundException($"Employee with email {email} does not exist.");
-            
-            if (employee.DeviceEmployees.Count == 0)
-                throw new KeyNotFoundException($"No devices for employee with email {email} exist.");
-            
-            foreach (var device in employee.DeviceEmployees)
-            {
-                deviceDtos.Add(new ViewDeviceDto
-                {
-                    Id = device.Device.Id,
-                    Name = device.Device.Name,
-                    DeviceType = device.Device.DeviceType.Name,
-                    IsEnabled = device.Device.IsEnabled,
-                    AdditionalProperties = device.Device.AdditionalProperties
-                });                
-            }
-
-            return deviceDtos;
-        }
-        catch (KeyNotFoundException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException("Error while retrieving device data for the User", ex);
-        }
-    }
-
     // only for User
     public async Task<bool> UpdateUsersData(string email, int id, UpdateAccountDto updateDto, CancellationToken cancellationToken)
     {
