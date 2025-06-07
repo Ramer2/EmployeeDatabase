@@ -15,7 +15,7 @@ public interface IAccountService
     
     public Task<bool> DeleteAccount(int accountId, CancellationToken cancellationToken);
     
-    public Task<ViewAccountDto> ViewAccount(string email, CancellationToken cancellationToken);
+    public Task<ViewAccountDto> ViewAccount(string email, int id, CancellationToken cancellationToken);
     
     public Task<List<ViewDeviceDto>> ViewAssignedDevices(string email, CancellationToken cancellationToken);
     

@@ -17,31 +17,18 @@ public class AccountsController : ControllerBase
         _accountService = accountService;
     }
 
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     [Route("/api/accounts")]
     public async Task<IResult> GetAccounts(CancellationToken cancellationToken)
     {
         try
         {
-            if (User.IsInRole("Admin"))
-            {
-                var accounts = await _accountService.GetAllAccounts(cancellationToken);
-                if (accounts.Count == 0)
-                    return Results.NotFound();
+            var accounts = await _accountService.GetAllAccounts(cancellationToken);
+            if (accounts.Count == 0)
+                return Results.NotFound();
 
-                return Results.Ok(accounts);                
-            }
-            else
-            { 
-                if (User.FindFirst(ClaimTypes.Email) == null) 
-                    return Results.Problem("Invalid credentials");
-                
-                var res = await _accountService
-                    .ViewAccount(User.FindFirst(ClaimTypes.Email).Value, cancellationToken);
-                
-                return Results.Ok(res);
-            }
+            return Results.Ok(accounts);   
         }
         catch (Exception ex)
         {
@@ -49,15 +36,34 @@ public class AccountsController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,User")]
     [HttpGet]
     [Route("/api/accounts/{id}")]
     public async Task<IResult> GetAccountById(int id, CancellationToken cancellationToken)
     {
         try
         {
-            var account = await _accountService.GetSpecificAccount(id, cancellationToken);
-            return Results.Ok(account);
+            if (User.IsInRole("Admin")) // Admin
+            {
+                var account = await _accountService.GetSpecificAccount(id, cancellationToken);
+                return Results.Ok(account);
+            }
+            else // User - check id
+            {
+                if (User.FindFirst(ClaimTypes.Email) == null)
+                    return Results.Problem("Invalid credentials");
+
+                var res = await _accountService
+                    .ViewAccount(User.FindFirst(ClaimTypes.Email)!.Value, id, cancellationToken);
+                
+                return Results.Ok(res);
+            }
+
+
+        }
+        catch (ApplicationException)
+        {
+            return Results.Forbid();
         }
         catch (KeyNotFoundException ex)
         {

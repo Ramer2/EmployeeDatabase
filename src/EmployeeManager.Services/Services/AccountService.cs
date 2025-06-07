@@ -197,7 +197,7 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<ViewAccountDto> ViewAccount(string email, CancellationToken cancellationToken)
+    public async Task<ViewAccountDto> ViewAccount(string email, int id, CancellationToken cancellationToken)
     {
         try
         {
@@ -209,6 +209,9 @@ public class AccountService : IAccountService
 
             if (user == null) 
                 throw new KeyNotFoundException($"No employee with email {email} exists.");
+
+            if (user.Id != id)
+                throw new ApplicationException("User can have access only to their own account.");
 
             return new ViewAccountDto
             {
