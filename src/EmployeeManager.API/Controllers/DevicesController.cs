@@ -133,9 +133,13 @@ public class DevicesController : ControllerBase
             try
             {
                 var email = User.FindFirst(ClaimTypes.Email).Value;
-            
+
                 await _deviceService.UpdateUsersDevice(email, dto, id, cancellationToken);
-                return Results.Ok();                
+                return Results.Ok();
+            }
+            catch (AccessViolationException)
+            {
+                return Results.Forbid();
             }
             catch (KeyNotFoundException)
             {

@@ -257,29 +257,34 @@ public class DeviceService : IDeviceService
                 .ThenInclude(de => de.Device)
                 .Where(emp => emp.Person.Email == email)
                 .FirstOrDefaultAsync(cancellationToken);
-            
+
             if (user == null)
                 throw new KeyNotFoundException($"No user found with email {email}");
-            
+
             var device = user.DeviceEmployees.FirstOrDefault(de => de.Device.Id == id);
-            
+
             if (device == null)
                 throw new KeyNotFoundException($"Device with id {id} not found");
-            
+
             var deviceType = await _context.DeviceTypes
                 .FirstOrDefaultAsync(x => x.Name == updateDeviceDto.DeviceType, cancellationToken);
-            
+
             if (deviceType == null)
-                throw new ArgumentException($"Device type {updateDeviceDto.DeviceType} not found");
-            
+                throw new AccessViolationException($"User cannot update devices which do not belong to them.");
+
             device.Device.Name = updateDeviceDto.Name;
             device.Device.DeviceType = deviceType;
             device.Device.IsEnabled = updateDeviceDto.IsEnabled;
-            device.Device.AdditionalProperties = (updateDeviceDto.AdditionalProperties == null ? "" : updateDeviceDto.AdditionalProperties).ToString();
+            device.Device.AdditionalProperties =
+                (updateDeviceDto.AdditionalProperties == null ? "" : updateDeviceDto.AdditionalProperties).ToString();
 
             _context.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
             return true;
+        }
+        catch (AccessViolationException)
+        {
+            throw;
         }
         catch (KeyNotFoundException)
         {
