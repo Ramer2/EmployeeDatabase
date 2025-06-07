@@ -41,3 +41,5 @@ Admin has access to almost all endpoints, except these:
 That's it, I hope my points are valid and I will not lose my points over some stupid shit I overlooked. Surely..
 
 "Scientists discover the world that exists. Engineers create the world that never was." - Theodore Von Karman
+
+(Okay-okay, I saw the 12th task, i will change it to IDs 😒)
