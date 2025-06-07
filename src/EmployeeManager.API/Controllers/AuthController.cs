@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
             .Include(a => a.Role)
             .Include(acc => acc.Employee)
             .ThenInclude(e => e.Person)
-            .FirstOrDefaultAsync(a => string.Equals(a.Username, user.Username), cancellationToken);
+            .FirstOrDefaultAsync(a => string.Equals(a.Username, user.Login), cancellationToken);
         
         if (foundAccount == null)
             return Results.Unauthorized();
