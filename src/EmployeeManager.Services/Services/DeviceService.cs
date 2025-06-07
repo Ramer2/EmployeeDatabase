@@ -1,9 +1,11 @@
-﻿using EmployeeManager.Models.models;
+﻿using System.Text.Json;
+using EmployeeManager.Models.models;
 using EmployeeManager.Services.context;
 using EmployeeManager.Services.dtos.devices;
 using EmployeeManager.Services.dtos.employees;
 using EmployeeManager.Services.interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EmployeeManager.Services.services;
 
@@ -57,7 +59,7 @@ public class DeviceService : IDeviceService
             {
                 Name = device.Name,
                 DeviceType = device.DeviceType.Name,
-                AdditionalProperties = device.AdditionalProperties,
+                AdditionalProperties = device.AdditionalProperties.IsNullOrEmpty() ? null : JsonDocument.Parse(device.AdditionalProperties).RootElement,
                 CurrentEmployee = null
             };
         
