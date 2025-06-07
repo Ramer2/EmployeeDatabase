@@ -34,18 +34,40 @@ public class DevicesController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,User")]
     [HttpGet]
     [Route("/api/devices/{id}")]
     public async Task<IResult> GetDeviceById(int id, CancellationToken cancellationToken)
     {
         if (id < 0) return Results.BadRequest("Invalid id");
-        
+
         try
         {
-            var device = await _deviceService.GetDeviceById(id, cancellationToken);
-            if (device == null) return Results.NotFound("Device not found");
-            return Results.Ok(device);
+            if (User.IsInRole("Admin")) // Admin
+            {
+                var device = await _deviceService.GetDeviceById(id, cancellationToken);
+                if (device == null) return Results.NotFound("Device not found");
+                return Results.Ok(device);
+            }
+            else // User - check id
+            {
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (email == null)
+                    return Results.Problem("Invalid credentials");
+
+                var device = await _deviceService.GetUsersDeviceById(email, id, cancellationToken);
+                if (device == null) return Results.NotFound("Device not found");
+                return Results.Ok(device);
+            }
+        }
+        catch (AccessViolationException)
+        {
+            return Results.Forbid();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return Results.NotFound(ex.Message);
         }
         catch (Exception ex)
         {
